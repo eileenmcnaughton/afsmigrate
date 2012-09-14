@@ -1,0 +1,23 @@
+; $Id$
+name = Fuzion Migrate Hooks for AFS
+description = Functions to assist with Fuzion import
+package = AFS
+core = 7.x
+version = "7.x-1.0"
+dependencies[] = civimigrate
+files[] = individual.inc
+files[] = individualemail.inc
+files[] = individualemail2.inc
+files[] = individualemailwork.inc
+files[] = individualaddress.inc
+files[] = individualfax.inc
+files[] = individualphone.inc
+files[] = relationship.inc
+files[] = relationshiptypes.inc
+files[] = organisation.inc
+files[] = organisationaddress.inc
+files[] = organisationemail.inc
+files[] = organisationfax.inc
+files[] = organisationwebsite.inc
+files[] = afsmigrateogsofiatest.inc
+files[] = afsmigratedrupalusers.inc

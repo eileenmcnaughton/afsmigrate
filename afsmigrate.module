@@ -1,0 +1,131 @@
+<?php
+
+/*
+ * You must implement hook_migrate_api(), setting the API level to 2, for
+ * your migration classes to be recognized by the Migrate module.
+ */
+function afsmigrate_migrate_api() {
+  $api = array(
+    'api' => 2,
+  );
+  return $api;
+}
+
+
+function afsmigrate_migrate_prepare_contact(&$params, $tblinfo, $row){
+  if($params['contact_type'] == 'Organization'){
+    $params['external_identifier'] = 'O-' .$params['external_identifier'];
+    $result = civicrm_api('Contact','get',array('version' => 3, 'external_identifier' =>  $params['external_identifier']));
+    if(CRM_Utils_Array::value('id',$result)){
+      $params['id'] = $result['id'];
+    }
+    $result = civicrm_api('Contact','get',array('version' => 3, 'contact_type' => 'Organization','organization_name' => $params['organization_name']));
+    drupal_set_message("<pre>" . print_r($result,true) . "</pre>");
+	if(CRM_Utils_Array::value('id',$result)){
+      $params['id'] = $result['id'];
+    }
+    switch ($params['contact_sub_type']){
+      case 'AFS Chapter':
+        $params['contact_sub_type'] = 'AFS_Chapter';
+        break;
+      case 'AFS Partner':
+        $params['contact_sub_type'] = 'AFS_Partner';
+        break;
+      case 'School':
+        $params['contact_sub_type'] = 'Schools';
+        break;
+      case 'Outside Organization':
+        $params['contact_sub_type'] = 'Outside_Organisation';
+        break;
+      case 'Other Organization':
+        $params['contact_sub_type'] = 'Other_Organisation';
+        break;
+      case 'AFS National Office':
+      case 'AFS National Board':
+        unset($params['contact_sub_type'] );
+        break;
+    }
+   }
+}
+   function afsmigrate_migrate_prepare_email(&$params, $tblinfo, $row){
+   $glparams = $params;
+
+   unset($glparams['email']);
+     $existingEmail = civicrm_api('email', 'get', $glparams);
+     if($existingEmail['count'] == 1){
+       $params['id'] = $existingEmail['id'];
+     }
+     elseif($existingEmail['count'] == 2){
+       drupal_set_message(print_r($params,true));
+       unset($params['email']);
+     }
+   }
+
+   function afsmigrate_migrate_prepare_address(&$params, $tblinfo, $row){
+   $glparams = $params;
+   if($glparams['location_type_id'] ==7){
+     $glparams = array('version' => 3, 'contact_id' => $glparams['contact_id'],
+       'location_type_id' => 7);
+   }
+  // unset($glparams['email']);
+     $existingEmail = civicrm_api('address', 'get', $glparams);
+     if($existingEmail['count'] == 1){
+       $params['id'] = $existingEmail['id'];
+     }
+     elseif($existingEmail['count'] == 2){
+       drupal_set_message(print_r($params,true));
+       unset($params);
+     }
+   }
+
+   function afsmigrate_migrate_prepare_phone(&$params, $tblinfo, $row){
+   $glparams = $params;
+   if($glparams['location_type_id'] ==7){
+     $glparams = array('version' => 3, 'contact_id' => $glparams['contact_id'],
+       'location_type_id' => 7, 'phone_type_id' => $glparams['phone_type_id']);
+   }
+
+  // unset($glparams['email']);
+     $existingEmail = civicrm_api('phone', 'get', $glparams);
+     if($existingEmail['count'] == 1){
+       $params['id'] = $existingEmail['id'];
+     }
+     elseif($existingEmail['count'] == 2){
+       drupal_set_message(print_r($params,true));
+       unset($params);
+     }
+   }
+
+      function afsmigrate_migrate_prepare_website(&$params, $tblinfo, $row){
+   $glparams = $params;
+
+     $existingEmail = civicrm_api('website', 'get', $glparams);
+     if($existingEmail['count'] == 1){
+       $params['id'] = $existingEmail['id'];
+     }
+     elseif($existingEmail['count'] == 2){
+       drupal_set_message(print_r($params,true));
+       unset($params);
+     }
+   }
+      function afsmigrate_migrate_prepare_relationship(&$params, $tblinfo, $row){
+   $glparams = $params;
+   if($params['status'] == 'Inactive'){
+     $params['status'] = 1;
+   }elseif($params['status'] == 'Active'){
+     $params['status'] = 1;
+   }
+    drupal_set_message("<pre>" . print_r($params,true). "</pre>");
+    unset($glparams['end_date']);
+    unset($glparams['is_active']);
+     $existingEmail = civicrm_api('relationship', 'get', $glparams);
+         drupal_set_message("<pre>" . print_r($existingEmail,true). "</pre>");
+     if($existingEmail['count'] == 1){
+       $params['id'] = $existingEmail['id'];
+     }
+     elseif($existingEmail['count'] == 2){
+       drupal_set_message(print_r($params,true));
+       unset($params);
+     }
+   }
+
